@@ -1,38 +1,34 @@
 module.exports = function check(str, bracketsConfig) {
-  const openToClose = new Map(
-    bracketsConfig.map(([open, close]) => [open, close])
-  );
-  const closeToOpen = new Map(
+  const stack = [];
+  const openBrackets = bracketsConfig.map(([open]) => open);
+  const bracketPairs = Object.fromEntries(
     bracketsConfig.map(([open, close]) => [close, open])
   );
-  const symmetric = new Set(
-    bracketsConfig
-      .filter(([open, close]) => open === close)
-      .map(([open]) => open)
-  );
+  const symmetricBrackets = bracketsConfig
+    .filter(([open, close]) => open === close)
+    .map(([br]) => br);
 
-  const stack = [];
+  for (let i = 0; i < str.length; i += 1) {
+    const curr = str[i];
 
-  const ok = str.split('').every((char) => {
-    if (symmetric.has(char)) {
-      if (stack[stack.length - 1] === char) stack.pop();
-      else stack.push(char);
-      return true;
+    if (symmetricBrackets.includes(curr)) {
+      if (stack[stack.length - 1] === curr) {
+        stack.pop();
+      } else {
+        stack.push(curr);
+      }
+    } else if (openBrackets.includes(curr)) {
+      stack.push(curr);
+    } else {
+      if (stack.length === 0) return false;
+      const top = stack[stack.length - 1];
+      if (bracketPairs[curr] === top) {
+        stack.pop();
+      } else {
+        return false;
+      }
     }
+  }
 
-    if (openToClose.has(char)) {
-      stack.push(char);
-      return true;
-    }
-
-    if (closeToOpen.has(char)) {
-      const needOpen = closeToOpen.get(char);
-      const last = stack.pop();
-      return last === needOpen;
-    }
-
-    return false;
-  });
-
-  return ok && stack.length === 0;
+  return stack.length === 0;
 };
