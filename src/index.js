@@ -1,32 +1,15 @@
 module.exports = function check(str, bracketsConfig) {
   const stack = [];
-  const openBrackets = bracketsConfig.map(([open]) => open);
-  const bracketPairs = Object.fromEntries(
-    bracketsConfig.map(([open, close]) => [close, open])
+  const brackets = Object.fromEntries(
+    bracketsConfig.map(([open, close]) => [open, close])
   );
-  const symmetricBrackets = bracketsConfig
-    .filter(([open, close]) => open === close)
-    .map(([br]) => br);
 
   for (let i = 0; i < str.length; i += 1) {
-    const curr = str[i];
-
-    if (symmetricBrackets.includes(curr)) {
-      if (stack[stack.length - 1] === curr) {
-        stack.pop();
-      } else {
-        stack.push(curr);
-      }
-    } else if (openBrackets.includes(curr)) {
-      stack.push(curr);
+    const char = str[i];
+    if (brackets[stack.at(-1)] === char) {
+      stack.pop();
     } else {
-      if (stack.length === 0) return false;
-      const top = stack[stack.length - 1];
-      if (bracketPairs[curr] === top) {
-        stack.pop();
-      } else {
-        return false;
-      }
+      stack.push(char);
     }
   }
 
